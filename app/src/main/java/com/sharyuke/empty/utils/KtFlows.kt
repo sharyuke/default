@@ -1,4 +1,4 @@
-package com.rupee.shine.dhan.rupeeshine.utils
+package com.sharyuke.empty.utils
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
