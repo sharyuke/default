@@ -1,2 +1,2 @@
-rootProject.name = "Empty"
+rootProject.name = "Default"
 include(":app")
