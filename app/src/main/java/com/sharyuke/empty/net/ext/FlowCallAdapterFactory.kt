@@ -7,10 +7,14 @@ import retrofit2.Retrofit
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
+/**
+ * 响应适配器生成类
+ */
 class FlowCallAdapterFactory private constructor(private var isAsync: Boolean) :
     CallAdapter.Factory() {
 
     companion object {
+
         /**
          * 同步
          */

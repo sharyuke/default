@@ -13,6 +13,9 @@ import retrofit2.Response
 import java.lang.reflect.Type
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * 响应适配器
+ */
 internal class FlowCallAdapter<R>(
     private val responseType: Type,
     private val isAsync: Boolean,

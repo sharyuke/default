@@ -5,6 +5,9 @@ import kotlinx.coroutines.flow.Flow
 import retrofit2.http.GET
 import retrofit2.http.Url
 
+/**
+ * 接口定义
+ */
 interface IfNet {
 
     @GET("/foo/bar")
