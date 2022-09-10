@@ -1,18 +1,29 @@
 package com.sharyuke.empty.utils
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.consumeEach
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
-fun <T> Flow<T>.bucket(capacity: Int, time: Long = Long.MAX_VALUE, onSave: (Int) -> Unit = {}) = flow<List<T>> {
+/**
+ * 带过期计时器的缓冲器，
+ * 拦截一定数据的数据，达到指定数量，一次性传递给下游。
+ * 此操作符使用场景：双击back退出app
+ *
+ * @param capacity 缓存容量
+ * @param expire 过期时间，达到指定时间，容量不满则抛弃
+ * @param onSave 每次存入回调
+ */
+fun <T> Flow<T>.bucket(capacity: Int, expire: Long = Long.MAX_VALUE, onSave: (Int) -> Unit = {}) = flow<List<T>> {
     val current = ArrayList<T>(capacity)
     var job: Job? = null
     coroutineScope {
         collect {
             job?.cancel()
             job = launch {
-                delay(time)
+                delay(expire)
                 current.clear()
             }
             if (current.size < capacity - 1) {
@@ -24,12 +35,9 @@ fun <T> Flow<T>.bucket(capacity: Int, time: Long = Long.MAX_VALUE, onSave: (Int)
     }
 }
 
-fun <T> Flow<T>.catchWhen(p: (Throwable) -> Boolean, block: suspend () -> Unit) = catch { if (p(it)) block() else throw it }
-
-fun <T> eachOf(list: Array<T>) = flow { list.forEach { emit(it) } }
-
-suspend fun endEach() = currentCoroutineContext().cancel(EndTestException())// 结束掉循环
-fun CoroutineScope.closeWithErr(e: Throwable?) = cancel(CancellationException(e?.message, e)) // 结束掉Callback
-
-class EndTestException : CancellationException("We fond useful IP!!")
-class NotFoundException : CancellationException("Not found IP!!")
+/**
+ * 当下游拥堵，丢弃上游数据，相当于木桶的短板
+ * @param drop 是否丢弃。
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+fun <T> Flow<T>.dropIfBusy(drop: Boolean): Flow<T> = flow { coroutineScope { produce(capacity = if (drop) Channel.RENDEZVOUS else Channel.UNLIMITED) { collect { trySend(it) } }.consumeEach { emit(it) } } }

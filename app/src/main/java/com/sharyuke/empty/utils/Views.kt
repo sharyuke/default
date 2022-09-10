@@ -19,8 +19,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.sharyuke.empty.dm
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.*
-import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.*
 
 val uiHandler = Handler(Looper.getMainLooper())
@@ -28,6 +28,7 @@ val GSON = Gson()
 
 val View.lifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
 fun View.lifecycleScope(block: LifecycleCoroutineScope.() -> Unit) = findViewTreeLifecycleOwner()?.lifecycleScope?.apply(block)
+
 fun <T> Flow<T>.launchIn(scope: CoroutineScope?): Job? = scope?.launch { collect() }
 
 /**
@@ -40,9 +41,6 @@ fun <T : View> T.onClick(drop: Boolean = true, scope: LifecycleCoroutineScope? =
     }.dropIfBusy(drop).onEach { i -> back(i).apply { delay(500) } }.flowOn(Dispatchers.Main).launchIn(scope ?: lifecycleScope ?: GlobalScope)
     return this
 }
-
-@OptIn(ExperimentalCoroutinesApi::class)
-fun <T> Flow<T>.dropIfBusy(drop: Boolean): Flow<T> = flow { coroutineScope { produce(capacity = if (drop) Channel.RENDEZVOUS else UNLIMITED) { collect { trySend(it) } }.consumeEach { emit(it) } } }
 
 fun <T : View> T.onClickLong(back: T.() -> Boolean): T {
     setOnLongClickListener { back(this) }// 长按大概率不会重复点击，所以去掉重复点击逻辑

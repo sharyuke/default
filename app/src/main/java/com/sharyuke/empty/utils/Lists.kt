@@ -22,8 +22,16 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 /**
- * @see onClick in file Views.kt
- * @see loadUrl in file Views.kt
+ * 使用方式
+ * ```
+ *         adapterCreate(R.layout.item_simple_txt, list) { // 布局文件和初始化数据，可选空视图、初始化数据
+ *             onHasItem {                                 // item作用域
+ *                  setImageResource(R.id.item_simple_icon, icon) // 设置图片
+ *                  setText(R.id.item_simple_name, name)          // 设置文字
+ *             }
+ *           onItemClick { item.onClick() }                       // 设置item点击事件
+ *        }.withRecyclerView(findViewById(R.id.view_list_layout_manager_rv)) // 绑定RV
+ * ```
  */
 class EasyHolder<T>(view: View) : BaseViewHolder(view) {
     var item: T? = null
@@ -67,6 +75,19 @@ const val PAGE_FIRST = 1
 
 /**
  * 分页适配器
+ *
+ * 使用方式
+ * ```
+ *    adapterPaging<String>(R.layout.item_simple_txt) { // 布局文件
+ *      onHasItem { setText(R.id.item_simple_name, this) }// 布局方法实现，onHasItem里面是item的实体
+ *    }.withRecyclerView(findViewById(R.id.view_list_page_rv)) // 挂载recyclerView实例，可以传一个空视图，见方法。
+ *        .withRefresher(findViewById(R.id.refresh) // 下来刷新，如不需要，可以去掉。
+ *        ... // 这里有多个方法，可以配合一些扩展方法来实现多个功能。
+ *        .pagingStart(lifecycleScope) { getData(it) } // 开始分页，绑定生命周期和获取分页数据，getDate(it) 可以是一个suspend 阻塞（挂起）函数。
+ * ```
+ *
+ * @param layout 布局文件
+ * @param convert 转换方法
  */
 fun <T : Any> adapterPaging(layout: Int, convert: EasyPagingHolder<T>.() -> Unit) = object : PagingDataAdapter<T, EasyPagingHolder<T>>(object : DiffUtil.ItemCallback<T>() {
 
