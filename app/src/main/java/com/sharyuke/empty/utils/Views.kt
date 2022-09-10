@@ -15,8 +15,6 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.sharyuke.empty.dm
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
@@ -24,7 +22,6 @@ import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.*
 
 val uiHandler = Handler(Looper.getMainLooper())
-val GSON = Gson()
 
 val View.lifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
 fun View.lifecycleScope(block: LifecycleCoroutineScope.() -> Unit) = findViewTreeLifecycleOwner()?.lifecycleScope?.apply(block)
@@ -75,5 +72,3 @@ fun ViewPager2.setOnPageChange(back: (Int) -> Unit) {
         }
     })
 }
-
-inline fun <reified T> String.toObject(): T = GSON.fromJson(this, object : TypeToken<T>() {}.type)
