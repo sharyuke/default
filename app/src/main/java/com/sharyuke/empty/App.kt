@@ -3,6 +3,7 @@ package com.sharyuke.empty
 import android.app.Application
 import android.util.DisplayMetrics
 import com.sharyuke.empty.net.NetClient
+import com.sharyuke.empty.net.SocketClient
 
 /**
  * 采用静态方法生成该对象，保证在每个没有上下文对象的地方，均能访问设备屏幕信息，以便于能使用10.dp这种写法。
@@ -24,9 +25,12 @@ class App : Application() {
      */
     lateinit var netClient: NetClient
 
+    lateinit var socketClient: SocketClient
+
     override fun onCreate() {
         super.onCreate()
         netClient = NetClient(this)
+        socketClient = SocketClient(this)
         dm = resources.displayMetrics
     }
 }
