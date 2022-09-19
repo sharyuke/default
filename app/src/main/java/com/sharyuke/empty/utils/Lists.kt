@@ -17,7 +17,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.chad.library.adapter.base.BaseQuickAdapter
-import com.chad.library.adapter.base.viewholder.BaseViewHolder
+import com.chad.library.adapter.base.viewholder.QuickViewHolder
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.onEach
  *        }.withRecyclerView(findViewById(R.id.view_list_layout_manager_rv)) // 绑定RV
  * ```
  */
-class EasyHolder<T>(view: View) : BaseViewHolder(view) {
+class EasyHolder<T>(view: View) : QuickViewHolder(view) {
     var item: T? = null
     var adapter: BaseQuickAdapter<T, EasyHolder<T>>? = null
     val context: Context = view.context
@@ -48,17 +48,20 @@ class EasyHolder<T>(view: View) : BaseViewHolder(view) {
 
 data class ItemModel<T>(val position: Int, val item: T, val adapter: BaseQuickAdapter<T, EasyHolder<T>>)
 
-fun <T> adapterCreate(layout: Int, initData: List<T>? = null, emptyLayout: Int? = null, convert: EasyHolder<T>.() -> Unit): BaseQuickAdapter<T, EasyHolder<T>> = object : BaseQuickAdapter<T, EasyHolder<T>>(layout, initData?.toMutableList()) {
-    override fun convert(holder: EasyHolder<T>, item: T) {
+fun <T> adapterCreate(layout: Int, initData: List<T>? = null, emptyLayout: Int? = null, convert: EasyHolder<T>.() -> Unit): BaseQuickAdapter<T, EasyHolder<T>> = object : BaseQuickAdapter<T, EasyHolder<T>>(initData?.toMutableList() ?: emptyList()) {
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        if (emptyLayout != null) emptyView = (LayoutInflater.from(recyclerView.context).inflate(emptyLayout, recyclerView, false))
+    }
+
+    override fun onBindViewHolder(holder: EasyHolder<T>, position: Int, item: T?) {
         holder.item = item
         holder.adapter = this
         convert(holder)
     }
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-        super.onAttachedToRecyclerView(recyclerView)
-        if (emptyLayout != null) setEmptyView(LayoutInflater.from(recyclerView.context).inflate(emptyLayout, recyclerView, false))
-    }
+    override fun onCreateViewHolder(context: Context, parent: ViewGroup, viewType: Int): EasyHolder<T> = EasyHolder(LayoutInflater.from(context).inflate(layout, null, false))
 }
 
 fun <T> BaseQuickAdapter<T, EasyHolder<T>>.withRecyclerView(recyclerView: RecyclerView) = apply { recyclerView.adapter = this }
@@ -115,7 +118,7 @@ fun <T : Any> adapterPaging(layout: Int, convert: EasyPagingHolder<T>.() -> Unit
 }
 
 
-class EasyPagingHolder<T : Any>(view: View) : BaseViewHolder(view) {
+class EasyPagingHolder<T : Any>(view: View) : QuickViewHolder(view) {
     var item: T? = null
     var adapter: PagingDataAdapter<T, EasyPagingHolder<T>>? = null
 
