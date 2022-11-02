@@ -48,6 +48,32 @@ class EasyHolder<T>(view: View) : QuickViewHolder(view) {
 
 data class ItemModel<T>(val position: Int, val item: T, val adapter: BaseQuickAdapter<T, EasyHolder<T>>)
 
+interface ItemCheckable {
+    var checked: Boolean
+}
+
+fun <T : ItemCheckable> ItemModel<T>.checkSingle() {
+    adapter.items.forEachIndexed { index, it ->
+        val old = it.checked
+        it.checked = it == item
+        if (old != it.checked) adapter.notifyItemChanged(index)
+    }
+}
+
+fun <T : ItemCheckable> ItemModel<T>.checkMultiple() {
+    item.checked = !item.checked
+    adapter.notifyItemChanged(position)
+}
+
+fun <T : ItemCheckable> ItemModel<T>.checkClean() {
+    adapter.items.forEachIndexed { index, it ->
+        if (it.checked) {
+            it.checked = false
+            adapter.notifyItemChanged(index)
+        }
+    }
+}
+
 fun <T> adapterCreate(layout: Int, initData: List<T>? = null, emptyLayout: Int? = null, convert: EasyHolder<T>.() -> Unit): BaseQuickAdapter<T, EasyHolder<T>> = object : BaseQuickAdapter<T, EasyHolder<T>>(initData?.toMutableList() ?: emptyList()) {
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -117,7 +143,6 @@ fun <T : Any> adapterPaging(layout: Int, convert: EasyPagingHolder<T>.() -> Unit
     }
 }
 
-
 class EasyPagingHolder<T : Any>(view: View) : QuickViewHolder(view) {
     var item: T? = null
     var adapter: PagingDataAdapter<T, EasyPagingHolder<T>>? = null
@@ -134,6 +159,28 @@ class EasyPagingHolder<T : Any>(view: View) : QuickViewHolder(view) {
 
 data class ItemPagingModel<T : Any>(val position: Int, val item: T, val adapter: PagingDataAdapter<T, EasyPagingHolder<T>>)
 
+fun <T : ItemCheckable> ItemPagingModel<T>.checkSingle() {
+    adapter.snapshot().forEachIndexed { index, it ->
+        val old = it?.checked
+        it?.checked = it == item
+        if (old != it?.checked) adapter.notifyItemChanged(index)
+    }
+}
+
+fun <T : ItemCheckable> ItemPagingModel<T>.checkClean() {
+    adapter.snapshot().forEachIndexed { index, it ->
+        if (it?.checked == true) {
+            it.checked = false
+            adapter.notifyItemChanged(index)
+        }
+    }
+}
+
+fun <T : ItemCheckable> ItemPagingModel<T>.checkMultiple() {
+    item.checked = !item.checked
+    adapter.notifyItemChanged(position)
+}
+
 fun <T : Any> PagingDataAdapter<T, EasyPagingHolder<T>>.withRecyclerView(recyclerView: RecyclerView, emptyView: View? = null) = apply {
     addLoadStateListener {
         if (emptyView != null && it.source.refresh is LoadState.NotLoading) {
@@ -148,6 +195,10 @@ fun <T : Any> PagingDataAdapter<T, EasyPagingHolder<T>>.withRefresher(refresh: S
 //    refresh.setColorSchemeColors(refresh.context.resources.getColor(R.color.orange))
     addLoadStateListener { refresh.isRefreshing = it.refresh is LoadState.Loading && it.refresh !is LoadState.NotLoading }
     refresh.setOnRefreshListener { refresh() }
+}
+
+fun <T : Any> PagingDataAdapter<T, EasyPagingHolder<T>>.withLoading(block: (Boolean) -> Unit = {}) = apply {
+    addLoadStateListener { block(it.refresh is LoadState.Loading) }
 }
 
 fun <T : Any> PagingDataAdapter<T, EasyPagingHolder<T>>.pagingStart(lifeScope: LifecycleCoroutineScope, data: suspend (Int) -> List<T>) = Pager(PagingConfig(pageSize = PAGE_SIZE, prefetchDistance = PAGE_SIZE, false, initialLoadSize = PAGE_SIZE), initialKey = 0, pagingSourceFactory = {
