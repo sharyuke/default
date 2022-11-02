@@ -5,7 +5,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
 
 /**
  * 带过期计时器的缓冲器，
@@ -41,3 +43,12 @@ fun <T> Flow<T>.bucket(capacity: Int, expire: Long = Long.MAX_VALUE, onSave: (In
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 fun <T> Flow<T>.dropIfBusy(drop: Boolean): Flow<T> = flow { coroutineScope { produce(capacity = if (drop) Channel.RENDEZVOUS else Channel.UNLIMITED) { collect { trySend(it) } }.consumeEach { emit(it) } } }
+
+fun LongProgression.delayBy(step: Long) = asFlow().onEach { delay(step) }
+
+fun Long.countDown(delay: Long = 1000) = count(-1, delay)
+
+fun Long.count(step: Int = 1, delay: Long = 1000) = flow {
+    var start: Long = this@count
+    while (true) emit(start).also { delay(delay) }.also { start += step }
+}

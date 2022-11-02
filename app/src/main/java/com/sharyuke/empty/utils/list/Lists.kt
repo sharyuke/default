@@ -1,4 +1,4 @@
-package com.sharyuke.empty.utils
+package com.sharyuke.empty.utils.list
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -18,6 +18,9 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.viewholder.QuickViewHolder
+import com.sharyuke.empty.utils.loadUrl
+import com.sharyuke.empty.utils.onClick
+import com.sharyuke.empty.utils.onClickLong
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -30,6 +33,8 @@ import kotlinx.coroutines.flow.onEach
  *                  setText(R.id.item_simple_name, name)          // 设置文字
  *             }
  *           onItemClick { item.onClick() }                       // 设置item点击事件
+ *           onItemClick { checkMultiple() }                      // 多选
+ *           onItemClick { checkSingle() }                        // 单选
  *        }.withRecyclerView(findViewById(R.id.view_list_layout_manager_rv)) // 绑定RV
  * ```
  */
@@ -42,6 +47,8 @@ class EasyHolder<T>(view: View) : QuickViewHolder(view) {
     fun setClick(id: Int, click: (View) -> Unit?) = getView<View>(id).onClick { click(this) }
 
     fun onHasItem(block: T.() -> Unit) = item?.block()
+    fun <R> onHasItem(convert: T.() -> R, block: R.() -> Unit) = item?.apply { block(convert(this)) }
+
     fun onItemClick(itemClick: ItemModel<T>.() -> Unit) = itemView.onClick(scope = (context as FragmentActivity?)?.lifecycleScope) { item?.apply { itemClick(ItemModel(adapterPosition, this, adapter!!)) } }
     fun onItemClickLong(itemClick: ItemModel<T>.() -> Unit) = itemView.onClickLong { item?.apply { itemClick(ItemModel(adapterPosition, this, adapter!!)) }.let { true } }
 }
