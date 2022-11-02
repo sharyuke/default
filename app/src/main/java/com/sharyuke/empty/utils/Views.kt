@@ -48,10 +48,6 @@ fun ImageView.loadUrl(url: String?) {
     url?.let { Glide.with(context).load(it).into(this) }
 }
 
-fun Context.dialog(title: String = "Tips", msg: String? = "Tips", cancelText: String = "Cancel", submitText: String = "Submit", onDismiss: () -> Unit = {}, onCancel: () -> Unit = {}, onSubmit: () -> Unit = {}) {
-    Toast.makeText(this, title, Toast.LENGTH_LONG).show()//待完成
-}
-
 val Context.imm get() = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
 fun FragmentActivity.hideSoftInputMethod(view: View) = imm.hideSoftInputFromWindow(view.windowToken, 0)
