@@ -5,12 +5,12 @@ plugins {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "com.sharyuke.empty"
         minSdk = 21
-        targetSdk = 32
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -37,6 +37,9 @@ dependencies {
     implementation("com.google.android.material:material:1.4.0")
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
 
+    // user this line to fix Duplicate class androidx lifecycle viewmodellazy cause by cymchad adapter lib.
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
+
     implementation(netRetrofit)
     implementation(netRetrofitGson)
     implementation(netOkhttp)
@@ -46,7 +49,7 @@ dependencies {
     implementation(coroutinesAndroid)
     implementation(lifecycleKtx)
 
-    implementation(uiRecyclerViewQuickAdapter)
+    implementation(uiRecyclerViewQuickAdapter) { exclude("androidx.lifecycle", "lifecycle-viewmodel-ktx") }
     implementation(uiRecyclerView)
     implementation(uiPicGlide)
     implementation(uiPager3)

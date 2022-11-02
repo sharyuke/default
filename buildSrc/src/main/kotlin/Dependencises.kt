@@ -1,6 +1,9 @@
 // UI adapter
 const val uiRecyclerView = "androidx.recyclerview:recyclerview:1.2.1"
-const val uiRecyclerViewQuickAdapter = "com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.6"  // maven(url = "https://jitpack.io")
+
+//const val uiRecyclerViewQuickAdapter = "com.github.CymChad:BaseRecyclerViewAdapterHelper:3.0.6"  // maven(url = "https://jitpack.io")
+const val uiRecyclerViewQuickAdapter = "io.github.cymchad:BaseRecyclerViewAdapterHelper:4.0.0-beta02"
+
 // image net
 const val uiPicGlide = "com.github.bumptech.glide:glide:4.13.2"// google() , mavenCentral()
 const val uiPager3 = "androidx.paging:paging-runtime:3.0.0"
